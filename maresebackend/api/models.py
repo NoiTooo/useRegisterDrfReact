@@ -62,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     userimage = models.ImageField(upload_to=_user_profile_avator_upload_to,
-                                  default='images/default_icon.png', validators=[validate_is_picture], blank=True, null=True)
+                                  default='userimages/default_icon.png', validators=[validate_is_picture], blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
