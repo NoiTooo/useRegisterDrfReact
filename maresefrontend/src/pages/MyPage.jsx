@@ -1,28 +1,27 @@
 import { useEffect, useState } from "react"
 import { useCookies } from "react-cookie"
 import axios from "axios"
-
-import "../styles/MyPage.css"
+import styled from "styled-components"
 
 // components
 import { Navigation } from "../components/Navigation"
 import { Header } from "../components/Header"
+import { Profile } from "../components/Profile"
+
 
 export const MyPage = () => {
     const jwtToken = `${useCookies()[0].jwtToken}`
     const [cookies, setCookie, removeCookie] = useCookies(["jwtToken"])
 
     // userInfo
+    const [userId, setUserId] = useState("")
     const [email, setEmail] = useState("")
     const [userName, setUserName] = useState("")
     const [lastName, setLastName] = useState("")
     const [firstName, setFirstName] = useState("")
     const [userImage, setUserImage] = useState("")
 
-    // navbar
-    const [selectMenu, setSelectMenu] = useState("None")
-    const [catchError, setCatchError] = useState(false)
-    const [updateUserName, setpdateUserName] = useState(userName)
+    const [showProfile, setShowProfile] = useState(false)
 
     useEffect(() => {
         if (jwtToken === ''){
@@ -33,6 +32,7 @@ export const MyPage = () => {
             'Authorization': `JWT ${jwtToken}`
         }})
         .then((res) => {
+            setUserId(res.data.id)
             setEmail(res.data.email)
             setUserName(res.data.username)
             setLastName(res.data.last_name)
@@ -45,10 +45,12 @@ export const MyPage = () => {
     })
 
     // updateUser
-    const UpdateUserInfo = () => setSelectMenu("updateUser")
     const onChangeUpdateUserName = (event) => setpdateUserName(event.target.value)
+    const [catchError, setCatchError] = useState(false)
+    const [updateUserName, setpdateUserName] = useState(userName)
+
     
-    const onClickUpdateUserInfo = () => {
+    const onClickProfile = () => {
         axios.patch(`${process.env.REACT_APP_HOST}/api/auth/users/me/`, 
         {'username': updateUserName},
         {headers:{
@@ -59,42 +61,43 @@ export const MyPage = () => {
         })
     }
 
-    // resetPassword
-    const SetPassword = () =>  '../register/set-password'
-    // resetEmail
-    const ResetEmail = () => window.location.href = '../register/reset-email'
-
     return (
         <>
-        <Header />
-        <main>
-            <nav><Navigation setSelectMenu={setSelectMenu}/></nav>
-            <div className="container">
-                {selectMenu==="userInfo" && 
-                    <div>
-                        <p>メールアドレス:{email}</p>
-                        <p>ユーザー名:{userName}</p>
-                        <p>氏名：{lastName} {firstName}</p>
-                        <p onClick={UpdateUserInfo}>ユーザー情報変更</p>
-                        <p onClick={SetPassword}>パスワードを変更する</p>
-                        <p onClick={ResetEmail}>メールアドレスを変更する</p>
-                        <img src={`${userImage}`} alt="Marese" />
-
-                    </div>
+        <Main>
+            <Header 
+                userImage={userImage}
+                setShowProfile={setShowProfile}
+            />
+            <Wrapper>
+                <Navigation />
+                { showProfile === true &&
+                    <Profile 
+                        userId={userId}
+                        email={email}
+                        userName={userName}
+                        lastName={lastName}
+                        firstName={firstName}
+                        userImage={userImage}                       
+                    />
                 }
-
-                {selectMenu==="updateUser" && 
-                    <div>
-                        <form>
-                            <p>メールアドレス:{email}</p>
-                            <p>ユーザー名:<input type="text" placeholder={userName} value={updateUserName} onChange={onChangeUpdateUserName} /></p>
-                            <button type="submit" onClick={onClickUpdateUserInfo}>更新</button>
-                        </form>
-                    </div>
-                }
-
-            </div>
-        </main>
+            </Wrapper>
+        </Main>
         </>
     )
 }
+
+const Main = styled.main`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #F8F8FF;
+`
+
+const Wrapper = styled.div`
+    width: 100%;
+    display: flex;
+`
